@@ -55,13 +55,13 @@ void CALLBACK midiCallback(HMIDIIN handle, UINT uMsg, DWORD dwInstance, DWORD dw
 	//auto noteFound = vecNotes.begin();
 
 
-	//for (auto it = vecNotes.begin(); it != vecNotes.end(); ++it)
-	//{
-	//	if (it->active == true)
-	//	{
-	//		auto noteFound = it;
-	//	}
-	//}
+	/*for (auto it = vecNotes.begin(); it != vecNotes.end(); ++it)
+	{
+		if (it->active == true)
+		{
+			auto noteFound = it;
+		}
+	}*/
 
 	if (noteFound == vecNotes.begin())//begin
 	{
@@ -84,27 +84,30 @@ void CALLBACK midiCallback(HMIDIIN handle, UINT uMsg, DWORD dwInstance, DWORD dw
 			// ...nothing to do
 		}
 	}
-	else
+	else if (vecNotes.size() != 0)
 	{
-		// Note exists in vector
-		if (HIWORD(dwParam1) != 0)
+		if (noteFound != vecNotes.begin())
 		{
-			// Key is still held, so do nothing
-			if (noteFound->off > noteFound->on)
+			// Note exists in vector
+			if (HIWORD(dwParam1) != 0)
 			{
-				// Key has been pressed again during release phase
-				noteFound->on = dTimeNow;
-				//noteFound->active = true;
+				// Key is still held, so do nothing
+				if (noteFound->off > noteFound->on)
+				{
+					// Key has been pressed again during release phase
+					noteFound->on = dTimeNow;
+					//noteFound->active = true;
+				}
 			}
-		}
-		else
-		{
-			// Key has been released, so switch off
-			if (noteFound->off < noteFound->on)
+			else
 			{
-				noteFound->off = dTimeNow;
+				// Key has been released, so switch off
+				if (noteFound->off < noteFound->on)
+				{
+					noteFound->off = dTimeNow;
+				}
+
 			}
-			
 		}
 	}
 	muxNotes.unlock();
