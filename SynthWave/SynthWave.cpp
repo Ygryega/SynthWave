@@ -16,6 +16,8 @@ vector<wstring> devices = CSoundDevice<short>::Enumerate();
 // Create sound machine!!
 CSoundDevice<short> sound(devices[0], 44100, 1, 8, 512);
 
+DWORD tempWord;
+
 void CALLBACK midiCallback(HMIDIIN handle, UINT uMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2)
 {
 	switch (uMsg)
@@ -49,9 +51,10 @@ void CALLBACK midiCallback(HMIDIIN handle, UINT uMsg, DWORD dwInstance, DWORD dw
 	wcout << "-----" << endl;
 
 	double dTimeNow = sound.GetTime();
-	DWORD tempWord = LOWORD(dwParam1);
+	tempWord = LOWORD(dwParam1);
+	DWORD newTemp = tempWord;
 	//short nKeyState = LOWORD(dwParam1);
-	auto noteFound = find_if(vecNotes.begin(), vecNotes.end(), [&tempWord](synthesizer::SNote const& item) { return item.active == true; });
+	auto noteFound = find_if(vecNotes.begin(), vecNotes.end(), [&newTemp](synthesizer::SNote const& item) { return item.active == true; });
 	//auto noteFound = vecNotes.begin();
 
 
@@ -65,24 +68,37 @@ void CALLBACK midiCallback(HMIDIIN handle, UINT uMsg, DWORD dwInstance, DWORD dw
 
 	if (noteFound == vecNotes.begin())//begin
 	{
+		bool noteActive = false;
 		// Note not found in vector
-		if (HIWORD(dwParam1) != 0)
+		for (auto it = vecNotes.begin(); it != vecNotes.end(); ++it)
 		{
-			// Key has been pressed so create a new note
-			//double temp = double(dwParam1);
-			synthesizer::SNote n;
-			n.id = tempWord;// LOWORD(dwParam1);
-			n.on = dTimeNow;
-			n.channel = 1;
-			n.active = true;
-			// Add note to vector
-			vecNotes.emplace_back(n);
+			if (it->id == tempWord)
+			{
+				noteActive = true;
+			}
 		}
-		else
+		if (noteActive == false)
 		{
-			// Note not in vector, but key has been released...
-			// ...nothing to do
-			//vecNotes.clear();
+
+			if (HIWORD(dwParam1) != 0)
+			{
+				// Key has been pressed so create a new note
+				//double temp = double(dwParam1);
+				synthesizer::SNote n;
+				n.id = tempWord;// LOWORD(dwParam1);
+				n.on = dTimeNow;
+				n.channel = 1;
+				n.active = true;
+				// Add note to vector
+				vecNotes.emplace_back(n);
+			}
+			else
+			{
+				// Note not in vector, but key has been released...
+				// ...nothing to do
+				//vecNotes.clear();
+				tempWord = NULL;
+			}
 		}
 	}
 	else
@@ -111,8 +127,8 @@ void CALLBACK midiCallback(HMIDIIN handle, UINT uMsg, DWORD dwInstance, DWORD dw
 
 			}
 		}
-		muxNotes.unlock();
 	}
+	muxNotes.unlock();
 }
 
 int main()
@@ -146,7 +162,6 @@ int main()
 		wcout << "Device found: " << d << endl;
 	}
 	cout << endl;
-
 
 	char keyboard[129];
 	memset(keyboard, ' ', 127);
@@ -211,10 +226,32 @@ int main()
 			result = midiInOpen(&inHandle, 0, (DWORD)midiCallback, 0, CALLBACK_FUNCTION);
 
 		
+			for (auto i = vecNotes.begin(); i != vecNotes.end(); ++i)
+			{
+				if (tempWord == i->id)
+				{
+					if (i->off > i->on)
+					{
+						// Key has been pressed again during release phase
+						i->on = dTimeNow;
+						//noteFound->active = true;
+					}
+				}
+				else
+				{
+					// Key has been released, so switch off
+					if (i->off < i->on)
+					{
+						i->off = dTimeNow;
+						//i->active = false;
+					}
+				}
+			}
 			//result = midiInOpen(&inHandle, 0, 0, 0, 0);
 			midiInStart(inHandle);
 			
 			
+
 			//// Check if note already exists in currently playing notes
 			//muxNotes.lock();
 			//auto noteFound = find_if(vecNotes.begin(), vecNotes.end(), [&k](synthesizer::SNote const& item) { return item.id == k; });
@@ -262,7 +299,7 @@ int main()
 			//		}
 			//	}
 			//}
-			muxNotes.unlock();
+			//muxNotes.unlock();
 		/*}*/
 		
 		wcout << "\rNotes: " << vecNotes.size() << "    ";

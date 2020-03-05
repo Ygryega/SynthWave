@@ -113,7 +113,7 @@ public:
 	SSquare()
 	{
 		envelope.mAttackTime = 0.01;
-		envelope.mDecayTime = 1.0;
+		envelope.mDecayTime = 3.0;
 		envelope.mSustainAmplitude = 0.0;
 		envelope.mReleaseTime = 1.0;
 		SineChoice = false;
