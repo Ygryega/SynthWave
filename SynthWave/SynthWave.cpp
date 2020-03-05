@@ -82,11 +82,12 @@ void CALLBACK midiCallback(HMIDIIN handle, UINT uMsg, DWORD dwInstance, DWORD dw
 		{
 			// Note not in vector, but key has been released...
 			// ...nothing to do
+			//vecNotes.clear();
 		}
 	}
-	else if (vecNotes.size() != 0)
+	else
 	{
-		if (noteFound != vecNotes.begin())
+		if (noteFound == vecNotes.begin())
 		{
 			// Note exists in vector
 			if (HIWORD(dwParam1) != 0)
@@ -105,12 +106,13 @@ void CALLBACK midiCallback(HMIDIIN handle, UINT uMsg, DWORD dwInstance, DWORD dw
 				if (noteFound->off < noteFound->on)
 				{
 					noteFound->off = dTimeNow;
+					noteFound->active = false;
 				}
 
 			}
 		}
+		muxNotes.unlock();
 	}
-	muxNotes.unlock();
 }
 
 int main()

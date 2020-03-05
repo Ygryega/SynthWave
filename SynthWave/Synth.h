@@ -101,7 +101,7 @@ namespace synthesizer
 			mAttackTime = 0.1;
 			mDecayTime = 0.1;
 			mSustainAmplitude = 1.0;
-			mReleaseTime = 0.2;
+			mReleaseTime = 0.1;
 			mStartingAmplitude = 1.0;
 		}
 
