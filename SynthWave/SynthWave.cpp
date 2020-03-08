@@ -11,12 +11,14 @@
 #include<stdio.h>
 using namespace std;
 
+
 vector<wstring> devices = CSoundDevice<short>::Enumerate();
 
 // Create sound machine!!
 CSoundDevice<short> sound(devices[0], 44100, 1, 8, 512);
 
 DWORD tempWord;
+
 
 void CALLBACK midiCallback(HMIDIIN handle, UINT uMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2)
 {
@@ -43,9 +45,9 @@ void CALLBACK midiCallback(HMIDIIN handle, UINT uMsg, DWORD dwInstance, DWORD dw
 	}
 	wcout << "dwInstance is " << dwInstance << endl;
 	wcout << "Handle is " << handle << endl;
-	wcout << "dwParam1 is " << dwParam1 << endl; //dwParam1 is the bytes of the MIDI Message packed into an unsigned long
-	wcout << "dwParam1_hiword is " << HIWORD(dwParam1) << endl; //velocity
-	wcout << "dwParam1_loword is " << LOWORD(dwParam1) << endl; //keyID
+	wcout << "Bytes of the midi message is " << dwParam1 << endl; //dwParam1 is the bytes of the MIDI Message packed into an unsigned long
+	wcout << "Velocity is " << HIWORD(dwParam1) << endl; //velocity
+	wcout << "Key ID is " << LOWORD(dwParam1) << endl; //keyID
 	wcout << "dwParam2 is " << dwParam2 << endl; //dwParam2 is the timestamp of key press
 	wcout << "uMsg is " << uMsg << endl;
 	wcout << "-----" << endl;
@@ -54,18 +56,11 @@ void CALLBACK midiCallback(HMIDIIN handle, UINT uMsg, DWORD dwInstance, DWORD dw
 	tempWord = LOWORD(dwParam1);
 	DWORD newTemp = tempWord;
 	//short nKeyState = LOWORD(dwParam1);
+
+	muxNotes.lock();
 	auto noteFound = find_if(vecNotes.begin(), vecNotes.end(), [&newTemp](synthesizer::SNote const& item) { return item.active == true; });
 	//auto noteFound = vecNotes.begin();
-
-
-	/*for (auto it = vecNotes.begin(); it != vecNotes.end(); ++it)
-	{
-		if (it->active == true)
-		{
-			auto noteFound = it;
-		}
-	}*/
-
+	
 	if (noteFound == vecNotes.begin())//begin
 	{
 		bool noteActive = false;
@@ -103,29 +98,26 @@ void CALLBACK midiCallback(HMIDIIN handle, UINT uMsg, DWORD dwInstance, DWORD dw
 	}
 	else
 	{
-		if (noteFound == vecNotes.begin())
+		// Note exists in vector
+		if (HIWORD(dwParam1) != 0)
 		{
-			// Note exists in vector
-			if (HIWORD(dwParam1) != 0)
+			// Key is still held, so do nothing
+			if (noteFound->off > noteFound->on)
 			{
-				// Key is still held, so do nothing
-				if (noteFound->off > noteFound->on)
-				{
-					// Key has been pressed again during release phase
-					noteFound->on = dTimeNow;
-					//noteFound->active = true;
-				}
+				// Key has been pressed again during release phase
+				noteFound->on = dTimeNow;
+				//noteFound->active = true;
 			}
-			else
+		}
+		else
+		{
+			// Key has been released, so switch off
+			if (noteFound->off < noteFound->on)
 			{
-				// Key has been released, so switch off
-				if (noteFound->off < noteFound->on)
-				{
-					noteFound->off = dTimeNow;
-					noteFound->active = false;
-				}
+				noteFound->off = dTimeNow;
+				noteFound->active = false;
+			}
 
-			}
 		}
 	}
 	muxNotes.unlock();
@@ -228,13 +220,18 @@ int main()
 		
 			for (auto i = vecNotes.begin(); i != vecNotes.end(); ++i)
 			{
-				if (tempWord == i->id)
+				
+				if (tempWord != 0)
 				{
-					if (i->off > i->on)
+					if (tempWord == i->id)
 					{
-						// Key has been pressed again during release phase
-						i->on = dTimeNow;
-						//noteFound->active = true;
+						if (i->off > i->on)
+						{
+							// Key has been pressed again during release phase
+							i->on = dTimeNow;
+							//matchFound = false;
+							//noteFound->active = true;
+						}
 					}
 				}
 				else
