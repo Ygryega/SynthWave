@@ -130,7 +130,7 @@ public:
 			+1.0 * synthesizer::COscillator(n.on - dTime, synthesizer::CSscaleConvert(n.id + 36), synthesizer::SQUARE_WAVE, lHZ, lAmplitude);
 
 		//inclorporating the velocity of the key as the volume out put of the singular key
-		return dAmplitude * dSound * n.volume * 0.1;
+		return dAmplitude * dSound * n.volume * 0.01;
 	}
 
 	FTYPE AddSine()

@@ -224,7 +224,6 @@ int main()
 		
 			for (auto i = vecNotes.begin(); i != vecNotes.end(); ++i)
 			{
-				
 				if (tempWord != 0)
 				{
 					if (tempWord == i->id)
@@ -235,6 +234,10 @@ int main()
 							i->on = dTimeNow;
 							//matchFound = false;
 							//noteFound->active = true;
+							
+							i->volume = tempVel;
+							
+
 						}
 					}
 				}
