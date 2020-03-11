@@ -48,7 +48,7 @@ void CALLBACK midiCallback(HMIDIIN handle, UINT uMsg, DWORD dwInstance, DWORD dw
 	wcout << "Bytes of the midi message is " << dwParam1 << endl; //dwParam1 is the bytes of the MIDI Message packed into an unsigned long
 	wcout << "Velocity is " << HIWORD(dwParam1) << endl; //velocity
 	wcout << "Key ID is " << LOWORD(dwParam1) << endl; //keyID
-	wcout << "dwParam2 is " << dwParam2 << endl; //dwParam2 is the timestamp of key press
+	wcout << "Time Stamp of keypress is " << dwParam2 << endl; //dwParam2 is the timestamp of key press
 	wcout << "uMsg is " << uMsg << endl;
 	wcout << "-----" << endl;
 

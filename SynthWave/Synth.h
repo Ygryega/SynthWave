@@ -30,6 +30,26 @@ namespace synthesizer
 		}
 	};
 
+	struct SKnob
+	{
+		DWORD id;
+		int channel;
+		bool active;
+		FTYPE on;
+		FTYPE off;
+
+		SKnob()
+		{
+			id = 0;
+			on = 0.0;
+			off = 0.0;
+			active = false;
+			channel = 0;
+		}
+	};
+
+
+
 	//Oscilator containing all of the various instruments
 	//all values are stored in integers and will be returning 
 	//values from +1 to  -1
