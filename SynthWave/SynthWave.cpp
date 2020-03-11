@@ -18,6 +18,7 @@ vector<wstring> devices = CSoundDevice<short>::Enumerate();
 CSoundDevice<short> sound(devices[0], 44100, 1, 8, 512);
 
 DWORD tempWord;
+DWORD tempVel;
 
 
 void CALLBACK midiCallback(HMIDIIN handle, UINT uMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2)
@@ -43,17 +44,18 @@ void CALLBACK midiCallback(HMIDIIN handle, UINT uMsg, DWORD dwInstance, DWORD dw
 		wcout << "-----LONGERROR.  EVEN WORSE.-----" << endl;
 		break;
 	}
-	wcout << "dwInstance is " << dwInstance << endl;
-	wcout << "Handle is " << handle << endl;
-	wcout << "Bytes of the midi message is " << dwParam1 << endl; //dwParam1 is the bytes of the MIDI Message packed into an unsigned long
-	wcout << "Velocity is " << HIWORD(dwParam1) << endl; //velocity
-	wcout << "Key ID is " << LOWORD(dwParam1) << endl; //keyID
-	wcout << "Time Stamp of keypress is " << dwParam2 << endl; //dwParam2 is the timestamp of key press
-	wcout << "uMsg is " << uMsg << endl;
-	wcout << "-----" << endl;
+	//wcout << "dwInstance is " << dwInstance << endl;
+	//wcout << "Handle is " << handle << endl;
+	//wcout << "Bytes of the midi message is " << dwParam1 << endl; //dwParam1 is the bytes of the MIDI Message packed into an unsigned long
+	//wcout << "Velocity is " << HIWORD(dwParam1) << endl; //velocity
+	//wcout << "Key ID is " << LOWORD(dwParam1) << endl; //keyID
+	//wcout << "Time Stamp of keypress is " << dwParam2 << endl; //dwParam2 is the timestamp of key press
+	//wcout << "uMsg is " << uMsg << endl;
+	//wcout << "-----" << endl;
 
 	double dTimeNow = sound.GetTime();
 	tempWord = LOWORD(dwParam1);
+	tempVel = HIWORD(dwParam1);
 	DWORD newTemp = tempWord;
 	//short nKeyState = LOWORD(dwParam1);
 
@@ -84,6 +86,8 @@ void CALLBACK midiCallback(HMIDIIN handle, UINT uMsg, DWORD dwInstance, DWORD dw
 				n.on = dTimeNow;
 				n.channel = 1;
 				n.active = true;
+				wcout << "Velocity is " << HIWORD(dwParam1) << endl; //velocity
+				n.volume = tempVel;
 				// Add note to vector
 				vecNotes.emplace_back(n);
 			}

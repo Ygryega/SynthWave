@@ -5,6 +5,18 @@ using namespace std;
 
 namespace synthesizer
 {
+	enum EKnobId
+	{
+		K1,
+		K2,
+		K3,
+		K4,
+		K5,
+		K6,
+		K7,
+		K8,
+	};
+
 	//Converting Hz to angular velocity with the use of PI
 	FTYPE ConvHz_AngVel(const FTYPE mHertz)
 	{
@@ -15,6 +27,7 @@ namespace synthesizer
 	struct SNote
 	{
 		DWORD id; //the current note rappresenting the position in the chosen scale
+		DWORD volume;
 		int channel;
 		bool active;
 		FTYPE on;//activation time	
@@ -27,6 +40,7 @@ namespace synthesizer
 			off = 0.0;
 			active = false;
 			channel = 0;
+			volume = 0;
 		}
 	};
 

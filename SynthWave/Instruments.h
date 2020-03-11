@@ -127,9 +127,10 @@ public:
 		if (dAmplitude <= 0.0) bNoteFinished = true;
 
 		FTYPE dSound =
-			+1.0 * synthesizer::COscillator(n.on - dTime, synthesizer::CSscaleConvert(n.id + 12), synthesizer::SQUARE_WAVE, lHZ, lAmplitude);
+			+1.0 * synthesizer::COscillator(n.on - dTime, synthesizer::CSscaleConvert(n.id + 36), synthesizer::SQUARE_WAVE, lHZ, lAmplitude);
 
-		return dAmplitude * dSound * dVolume;
+		//inclorporating the velocity of the key as the volume out put of the singular key
+		return dAmplitude * dSound * n.volume * 0.1;
 	}
 
 	FTYPE AddSine()
@@ -158,7 +159,7 @@ void safe_remove(T& v, lambda f)
 }
 
 FTYPE IncreaseAmplitude = 0.001f;
-FTYPE IncreaseHZ = 5.0f;
+FTYPE IncreaseHZ = 2.0f;
 
 FTYPE MakeNoise(int nChannel, FTYPE dTime)
 {
